@@ -41,3 +41,21 @@ export interface Range {
   start: Date
   end: Date
 }
+
+export interface IUser {
+  email: string
+  name: string
+  username: string
+  password: string
+}
+
+export interface IUserData extends Omit<IUser, 'password'> {
+  is_actived: boolean
+  token: string
+  id: string
+}
+
+export interface IErrorResponse {
+  message: string
+  errors: Record<string, string>
+}

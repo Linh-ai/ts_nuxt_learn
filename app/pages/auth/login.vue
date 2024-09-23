@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { FormError } from '#ui/types'
 
+definePageMeta({
+  layout: 'auth'
+})
 
 const fields = [
   {
@@ -34,6 +37,9 @@ const validate = (state: any) => {
 function onSubmit(data: any) {
   console.log('Submitted', data)
 }
+
+const user = useState('auth-user')
+console.log(user.value)
 </script>
 
 <template>
@@ -48,7 +54,7 @@ function onSubmit(data: any) {
       @submit="onSubmit"
     >
       <template #description>
-        Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>.
+        Don't have an account? <NuxtLink to="register" class="text-primary font-medium">Sign up</NuxtLink>.
       </template>
 
       <template #password-hint>
