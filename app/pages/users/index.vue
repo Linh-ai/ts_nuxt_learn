@@ -1,24 +1,30 @@
 <script setup lang="ts">
 import type { User } from '~/types'
 
-const defaultColumns = [{
-  key: 'id',
-  label: '#'
-}, {
-  key: 'name',
-  label: 'Name',
-  sortable: true
-}, {
-  key: 'email',
-  label: 'Email',
-  sortable: true
-}, {
-  key: 'location',
-  label: 'Location'
-}, {
-  key: 'status',
-  label: 'Status'
-}]
+const defaultColumns = [
+  {
+    key: 'stt',
+    label: '#'
+  },
+  {
+    key: 'username',
+    label: 'User name'
+  },
+  {
+    key: 'name',
+    label: 'Name',
+    sortable: true
+  },
+  {
+    key: 'email',
+    label: 'Email',
+    sortable: true
+  },
+  {
+    key: 'status',
+    label: 'Status'
+  }
+]
 
 const q = ref('')
 const selected = ref<User[]>([])
@@ -31,23 +37,36 @@ const isNewUserModalOpen = ref(false)
 
 const columns = computed(() => defaultColumns.filter(column => selectedColumns.value.includes(column)))
 
-const query = computed(() => ({ q: q.value, statuses: selectedStatuses.value, locations: selectedLocations.value, sort: sort.value.column, order: sort.value.direction }))
+// const query = computed(() => ({ q: q.value, statuses: selectedStatuses.value, locations: selectedLocations.value, sort: sort.value.column, order: sort.value.direction }))
 
-const { data: users, pending } = await useFetch<User[]>('/api/users', { query, default: () => [] })
+const { data: response, status } = await useFetchUsers()
 
-const defaultLocations = users.value.reduce((acc, user) => {
-  if (!acc.includes(user.location)) {
-    acc.push(user.location)
-  }
-  return acc
-}, [] as string[])
+const users = computed(() => {
+  return status.value === 'success'
+    ? response.value.data.map((user, index) => ({
+      ...user,
+      stt: index + 1
+    }))
+    : []
+})
+// const defaultLocations = users.value.reduce((acc, user) => {
+//   if (!acc.includes(user.location)) {
+//     acc.push(user.location)
+//   }
+//   return acc
+// }, [] as string[])
 
-const defaultStatuses = users.value.reduce((acc, user) => {
-  if (!acc.includes(user.status)) {
-    acc.push(user.status)
-  }
-  return acc
-}, [] as string[])
+console.log(2121, response)
+// const defaultStatuses = computed(() => {
+//   return status.value == 'success'
+//     ? users.value.reduce((acc, user) => {
+//       if (!acc.includes(user.status)) {
+//         acc.push(user.status)
+//       }
+//       return acc
+//     }, [] as string[])
+//     : []
+// })
 
 function onSelect(row: User) {
   const index = selected.value.findIndex(item => item.id === row.id)
@@ -66,14 +85,17 @@ defineShortcuts({
 </script>
 
 <template>
+  <!-- right content -->
   <UDashboardPage>
     <UDashboardPanel grow>
+      <!-- header -->
       <UDashboardNavbar
         title="Users"
-        :badge="users.length"
+        :badge="response.data.length"
       >
+        <!-- filter + add user -->
         <template #right>
-          <UInput
+          <!-- <UInput
             ref="input"
             v-model="q"
             icon="i-heroicons-funnel"
@@ -85,7 +107,7 @@ defineShortcuts({
             <template #trailing>
               <UKbd value="/" />
             </template>
-          </UInput>
+          </UInput> -->
 
           <UButton
             label="New user"
@@ -96,25 +118,29 @@ defineShortcuts({
         </template>
       </UDashboardNavbar>
 
+      <!-- tollbar to select display, status,... -->
       <UDashboardToolbar>
         <template #left>
-          <USelectMenu
+          <!-- filter by status -->
+          <!-- <USelectMenu
             v-model="selectedStatuses"
             icon="i-heroicons-check-circle"
             placeholder="Status"
             multiple
             :options="defaultStatuses"
             :ui-menu="{ option: { base: 'capitalize' } }"
-          />
-          <USelectMenu
+          /> -->
+          <!-- filter by location -->
+          <!-- <USelectMenu
             v-model="selectedLocations"
             icon="i-heroicons-map-pin"
             placeholder="Location"
             :options="defaultLocations"
             multiple
-          />
+          /> -->
         </template>
 
+        <!-- setting display column -->
         <template #right>
           <USelectMenu
             v-model="selectedColumns"
@@ -130,28 +156,30 @@ defineShortcuts({
         </template>
       </UDashboardToolbar>
 
+      <!-- modal add new user -->
       <UDashboardModal
         v-model="isNewUserModalOpen"
         title="New user"
-        description="Add a new user to your database"
+        description="Add a new user to edu.vn"
         :ui="{ width: 'sm:max-w-md' }"
       >
         <!-- ~/components/users/UsersForm.vue -->
         <UsersForm @close="isNewUserModalOpen = false" />
       </UDashboardModal>
 
+      <!-- Table -->
       <UTable
         v-model="selected"
         v-model:sort="sort"
         :rows="users"
         :columns="columns"
-        :loading="pending"
+        :loading="status=='pending'"
         sort-mode="manual"
         class="w-full"
         :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
         @select="onSelect"
       >
-        <template #name-data="{ row }">
+        <template #username-data="{ row }">
           <div class="flex items-center gap-3">
             <UAvatar
               v-bind="row.avatar"
@@ -165,8 +193,8 @@ defineShortcuts({
 
         <template #status-data="{ row }">
           <UBadge
-            :label="row.status"
-            :color="row.status === 'subscribed' ? 'green' : row.status === 'bounced' ? 'orange' : 'red'"
+            :label="row.is_actived ? 'active' : 'inactive'"
+            :color="row.is_actived ? 'green' : 'red'"
             variant="subtle"
             class="capitalize"
           />

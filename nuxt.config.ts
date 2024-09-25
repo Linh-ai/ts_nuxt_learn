@@ -53,5 +53,7 @@ export default defineNuxtConfig({
     public: {
       baseApiUrl: 'http://localhost:3000/api'
     }
-  }
+  },
+
+  ssr: false
 })

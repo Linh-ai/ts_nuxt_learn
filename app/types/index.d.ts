@@ -42,11 +42,14 @@ export interface Range {
   end: Date
 }
 
-export interface IUser {
+export interface IUserCredential {
   email: string
+  passsword: string
+}
+
+export interface IUser extends IUserCredential {
   name: string
   username: string
-  password: string
 }
 
 export interface IUserData extends Omit<IUser, 'password'> {
@@ -59,3 +62,21 @@ export interface IErrorResponse {
   message: string
   errors: Record<string, string>
 }
+
+export interface IUsersData {
+  current_page: number
+  data: IUserData[]
+  from: number
+  last_page: number
+  per_page: number
+  to: number
+  total: number
+}
+
+// export interface IUserDataWithSTT extends IUserData {
+//   stt: number
+// }
+
+// export interface IUsersDataWithSTT extends IUsersData {
+//   data: IUserDataWithSTT[]
+// }

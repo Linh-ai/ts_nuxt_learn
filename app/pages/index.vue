@@ -1,65 +1,86 @@
 <script setup lang="ts">
-import type { FormError } from '#ui/types'
+import { sub } from 'date-fns'
+import type { Period, Range } from '~/types'
 
+const { isNotificationsSlideoverOpen } = useDashboard()
 
-const fields = [
-  {
-    name: 'email',
-    type: 'text',
-    label: 'Email',
-    placeholder: 'Enter your email',
-    required: true
-  },
-  {
-    name: 'password',
-    label: 'Password',
-    type: 'password',
-    placeholder: 'Enter your password',
-    required: true
-  }
-  // {
-  //   name: 'remember',
-  //   label: 'Remember me',
-  //   type: 'checkbox'
-  // }
-]
+const items = [[{
+  label: 'New mail',
+  icon: 'i-heroicons-paper-airplane',
+  to: '/inbox'
+}, {
+  label: 'New user',
+  icon: 'i-heroicons-user-plus',
+  to: '/users'
+}]]
 
-const validate = (state: any) => {
-  const errors: FormError[] = []
-  if (!state.email) errors.push({ path: 'email', message: 'Email is required' })
-  if (!state.password) errors.push({ path: 'password', message: 'Password is required' })
-  return errors
-}
-
-function onSubmit(data: any) {
-  console.log('Submitted', data)
-}
+const range = ref<Range>({ start: sub(new Date(), { days: 14 }), end: new Date() })
+const period = ref<Period>('daily')
 </script>
 
 <template>
-  <UCard class="max-w-sm w-full m-auto">
-    <UAuthForm
-      :fields="fields"
-      :validate="validate"
-      title="Welcome back!"
-      align="top"
-      icon="i-heroicons-lock-closed"
-      :ui="{ base: 'text-center', footer: 'text-center' }"
-      @submit="onSubmit"
-    >
-      <template #description>
-        Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>.
-      </template>
+  <UDashboardPage>
+    <!-- right panel -->
+    <UDashboardPanel grow>
+      <!-- header on top panel -->
+      <UDashboardNavbar title="Home">
+        <template #right>
+          <UTooltip
+            text="Notifications"
+            :shortcuts="['N']"
+          >
+            <UButton
+              color="gray"
+              variant="ghost"
+              square
+              @click="isNotificationsSlideoverOpen = true"
+            >
+              <UChip
+                color="red"
+                inset
+              >
+                <UIcon
+                  name="i-heroicons-bell"
+                  class="w-5 h-5"
+                />
+              </UChip>
+            </UButton>
+          </UTooltip>
 
-      <template #password-hint>
-        <NuxtLink to="/" class="text-primary font-medium">Forgot password?</NuxtLink>
-      </template>
-      <template #validation>
-        <UAlert color="red" icon="i-heroicons-information-circle-20-solid" title="Error signing in" />
-      </template>
-      <template #footer>
-        By signing in, you agree to our <NuxtLink to="/" class="text-primary font-medium">Terms of Service</NuxtLink>.
-      </template>
-    </UAuthForm>
-  </UCard>
+          <UDropdown :items="items">
+            <UButton
+              icon="i-heroicons-plus"
+              size="md"
+              class="ml-1.5 rounded-full"
+            />
+          </UDropdown>
+        </template>
+      </UDashboardNavbar>
+
+      <!-- sub-navbar to add actions select date, priod for panel -->
+      <UDashboardToolbar>
+        <template #left>
+          <!-- ~/components/home/HomeDateRangePicker.vue -->
+          <HomeDateRangePicker
+            v-model="range"
+            class="-ml-2.5"
+          />
+
+          <!-- ~/components/home/HomePeriodSelect.vue -->
+          <HomePeriodSelect
+            v-model="period"
+            :range="range"
+          />
+        </template>
+      </UDashboardToolbar>
+
+      <UDashboardPanelContent>
+        <!-- ~/components/home/HomeChart.vue -->
+        <HomeChart
+          :period="period"
+          :range="range"
+        />
+      </UDashboardPanelContent>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormError } from '#ui/types'
-import { useCreateUser } from '~/composables/users/useCreateUser'
 import type { IUser, IErrorResponse } from '~/types'
 
 definePageMeta({
@@ -40,7 +39,6 @@ interface IFormData {
   name?: string
   username?: string
   password?: string
-
 }
 
 // contain errors mesage to show
@@ -48,8 +46,6 @@ const errors: Ref<FormError[]> = ref([])
 
 // function provide UForm to get errors array
 const validate = (state: IFormData) => {
-  console.log(state)
-
   // clear previous message
   errors.value = []
 
